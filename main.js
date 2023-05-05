@@ -33,9 +33,14 @@ const gameBoard = (() => {
   const makeMove = (gridIndex) => {
     if (!gameBoard[gridIndex] && !finished) {
       gameBoard[gridIndex] = player.getToken();
-      playerTurn();
-      round++;
-      if (playerWins()) {
+
+      if (playerWins() || round === 9) {
+        if (finished) {
+          console.log(player.getName() + "wins");
+        }
+      } else {
+        playerTurn();
+        round++;
       }
     }
     displayController.render();
@@ -60,7 +65,6 @@ const gameBoard = (() => {
       [2, 4, 6],
     ];
     for (i = 0; i < winCombinations.length; i++) {
-
       if (
         gameBoard[winCombinations[i][0]] === gameBoard[winCombinations[i][1]] &&
         gameBoard[winCombinations[i][2]] === gameBoard[winCombinations[i][0]]
