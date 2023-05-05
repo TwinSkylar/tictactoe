@@ -26,6 +26,7 @@ const gameBoard = (() => {
   const newGame = () => {
     finished = false;
     player = player1;
+    round = 1;
     gameBoard = new Array(9).fill(null);
     displayController.render();
   };
@@ -33,14 +34,20 @@ const gameBoard = (() => {
   const makeMove = (gridIndex) => {
     if (!gameBoard[gridIndex] && !finished) {
       gameBoard[gridIndex] = player.getToken();
-
-      if (playerWins() || round === 9) {
-        if (finished) {
-          console.log(player.getName() + "wins");
-        }
+      //Check if there is a winner
+      if (playerWins()) {
+        finished = true;
       } else {
-        playerTurn();
+        //Check if the game is a draw
+
+        if (round === 9) {
+          player = null;
+          finished = true;
+        } else {
+          playerTurn();
+        }
         round++;
+
       }
     }
     displayController.render();
@@ -77,9 +84,15 @@ const gameBoard = (() => {
     }
     return false;
   };
+  const getFinished = () => {
+    return finished;
+  };
+  const getPlayer = () => {
+    return player;
+  };
 
   //Public functions
-  return { newGame, makeMove, getBoard };
+  return { newGame, makeMove, getBoard, getFinished, getPlayer };
 })();
 
 /*displayController Object:  Controls the flow of the game*/
@@ -88,10 +101,10 @@ const displayController = (() => {
   const gameElement = document.getElementById("gameBoard");
   const resetBtn = document.getElementById("resetGame");
   const children = gameElement.children;
+
   //Add event listeners on button clicks per square
-  console.log("initializing: " + gameBoard.getBoard());
+
   for (i = 0; i < 9; i++) {
-    console.log("creating event listeners.  BAD!");
     children[i].addEventListener("click", (e) => {
       gameBoard.makeMove(e.target.dataset.square);
     });
@@ -104,10 +117,24 @@ const displayController = (() => {
   });
 
   const render = () => {
+    const gameState = document.getElementById("gameState");
+    const player = gameBoard.getPlayer();
+    //updates the gameboard
     for (i = 0; i < 9; i++) {
       children[i].textContent = gameBoard.getBoard(i);
     }
+    //updates the game status
+    if (gameBoard.getFinished()) {
+      if (player) {
+        gameState.textContent = player.getName() + " has won!";
+      } else {
+        gameState.textContent = "The game has ended in a draw.";
+      }
+    } else {
+      gameState.textContent = player.getName() + " turn to move";
+    }
   };
+
   //public functions
   return { render };
 })();
