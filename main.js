@@ -11,7 +11,7 @@ const playerFactory = (name, token) => {
 /*GameBoard Object*/
 const gameBoard = (() => {
   //gameBoard object declarations*/
-  let gameBoard = null;
+  let gameBoard = {};
   const player1 = playerFactory("player1", "X");
   const player2 = playerFactory("player2", "O");
   let player = player1;
@@ -24,62 +24,88 @@ const gameBoard = (() => {
   };
 
   const newGame = () => {
-    round = 1;
     finished = false;
-    let player = player1;
-    if (gameBoard === null) {
-      gameBoard = new Array(9).fill(null);
-      displayController.render(gameBoard);
-    }
-    else{
-      gameBoard = new Array(9).fill(null);
-      displayController.updateBoard(gameBoard);
-    }
+    player = player1;
+    gameBoard = new Array(9).fill(null);
+    displayController.render();
   };
 
   const makeMove = (gridIndex) => {
-    if (!gameBoard[gridIndex]) {
+    if (!gameBoard[gridIndex] && !finished) {
       gameBoard[gridIndex] = player.getToken();
       playerTurn();
+      round++;
+      if (playerWins()) {
+      }
     }
-    displayController.updateBoard(gameBoard);
+    displayController.render();
+  };
+
+  const getBoard = (i) => {
+    return gameBoard[i];
+  };
+
+  const playerWins = () => {
+    const winCombinations = [
+      //rows
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      //columns
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      //diagonal
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+    for (i = 0; i < winCombinations.length; i++) {
+
+      if (
+        gameBoard[winCombinations[i][0]] === gameBoard[winCombinations[i][1]] &&
+        gameBoard[winCombinations[i][2]] === gameBoard[winCombinations[i][0]]
+      ) {
+        if (gameBoard[winCombinations[i][0]]) {
+          finished = true;
+          return true;
+        }
+      }
+    }
+    return false;
   };
 
   //Public functions
-  return { newGame, makeMove };
+  return { newGame, makeMove, getBoard };
 })();
 
 /*displayController Object:  Controls the flow of the game*/
 
 const displayController = (() => {
-  const render = (gamePosition) => {
-    const gameElement = document.getElementById("gameBoard");
-    const resetBtn = document.getElementById("resetGame");
-    const children = gameElement.children;
-    //Add event listeners on button clicks per square
-    for (i = 0; i < 9; i++) {
-      children[i].textContent = gamePosition[i];
-      children[i].addEventListener("click", (e) => {
-        gameBoard.makeMove(e.target.dataset.square);
-      });
-    }
-
-    //Add event listener for the reset button
-
-    resetBtn.addEventListener("click", (e) => {
-      gameBoard.newGame();
+  const gameElement = document.getElementById("gameBoard");
+  const resetBtn = document.getElementById("resetGame");
+  const children = gameElement.children;
+  //Add event listeners on button clicks per square
+  console.log("initializing: " + gameBoard.getBoard());
+  for (i = 0; i < 9; i++) {
+    console.log("creating event listeners.  BAD!");
+    children[i].addEventListener("click", (e) => {
+      gameBoard.makeMove(e.target.dataset.square);
     });
-  };
+  }
 
-  const updateBoard = (gamePosition) => {
-    const gameElement = document.getElementById("gameBoard");
-    const children = gameElement.children;
+  //Add event listener for the reset button
+
+  resetBtn.addEventListener("click", (e) => {
+    gameBoard.newGame();
+  });
+
+  const render = () => {
     for (i = 0; i < 9; i++) {
-      children[i].textContent = gamePosition[i];
+      children[i].textContent = gameBoard.getBoard(i);
     }
   };
   //public functions
-  return { render, updateBoard };
+  return { render };
 })();
 
 //const game = displayController.render();
