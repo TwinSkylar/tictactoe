@@ -3,17 +3,18 @@ const playerFactory = (name, token) => {
   //Factory Declarations
   const getName = () => name;
   const getToken = () => token;
+  const setName = (newName) => (name = newName);
 
   //Public functions
-  return { getName, getToken };
+  return { getName, getToken, setName };
 };
 
 /*GameBoard Object*/
 const gameBoard = (() => {
   //gameBoard object declarations*/
   let gameBoard = {};
-  const player1 = playerFactory("player1", "X");
-  const player2 = playerFactory("player2", "O");
+  const player1 = playerFactory("Player One", "X");
+  const player2 = playerFactory("Player Two", "O");
   let player = player1;
   let round = 1;
   let finished = false;
@@ -47,7 +48,6 @@ const gameBoard = (() => {
           playerTurn();
         }
         round++;
-
       }
     }
     displayController.render();
@@ -91,8 +91,16 @@ const gameBoard = (() => {
     return player;
   };
 
+  const updateName = (newName, token) => {
+    if (token === "X") {
+      player1.setName(newName);
+    } else {
+      player2.setName(newName);
+    }
+  };
+
   //Public functions
-  return { newGame, makeMove, getBoard, getFinished, getPlayer };
+  return { newGame, makeMove, getBoard, getFinished, getPlayer, updateName };
 })();
 
 /*displayController Object:  Controls the flow of the game*/
@@ -100,6 +108,11 @@ const gameBoard = (() => {
 const displayController = (() => {
   const gameElement = document.getElementById("gameBoard");
   const resetBtn = document.getElementById("resetGame");
+  const form = document.getElementById("changeNameForm");
+  const playerOneName = document.getElementById("playerOneName");
+  const playerTwoName = document.getElementById("playerTwoName");
+
+
   const children = gameElement.children;
 
   //Add event listeners on button clicks per square
@@ -115,6 +128,28 @@ const displayController = (() => {
   resetBtn.addEventListener("click", (e) => {
     gameBoard.newGame();
   });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    gameBoard.updateName(form.elements["playerOneName"].value,"X");
+    gameBoard.updateName(form.elements["playerTwoName"].value,"O");
+    render();
+  });
+
+  playerOneName.addEventListener("blur", (e) => {
+    e.preventDefault();
+    gameBoard.updateName(form.elements["playerOneName"].value,"X");
+    gameBoard.updateName(form.elements["playerTwoName"].value,"O");
+    render();
+  });
+
+  playerTwoName.addEventListener("blur", (e) => {
+    e.preventDefault();
+    gameBoard.updateName(form.elements["playerOneName"].value,"X");
+    gameBoard.updateName(form.elements["playerTwoName"].value,"O");
+    render();
+  });
+
 
   const render = () => {
     const gameState = document.getElementById("gameState");
@@ -138,7 +173,5 @@ const displayController = (() => {
   //public functions
   return { render };
 })();
-
-//const game = displayController.render();
 
 const game = gameBoard.newGame();
